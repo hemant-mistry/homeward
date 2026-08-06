@@ -1,0 +1,23 @@
+[project]
+name = "homeward-backend"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "hemant-mistry",email = "108870271+hemant-mistry@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi (>=0.141.1,<0.142.0)",
+    "uvicorn (>=0.52.1,<0.53.0)",
+    "pydantic (>=2.13.4,<3.0.0)",
+    "supabase (>=2.31.0,<3.0.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "homeward_backend", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

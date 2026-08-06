@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MotiView, AnimatePresence } from 'moti';
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LoanTheme } from '@/constants/loan-theme';
 
 type Method = 'cash' | 'cheque';
+
+// Match the local IP address you used in index.tsx
+const API_BASE_URL = 'http://192.168.1.100:8000';
 
 export default function PaymentModal() {
   const router = useRouter();
@@ -15,22 +19,47 @@ export default function PaymentModal() {
   const [showPicker, setShowPicker] = useState(false);
   const [method, setMethod] = useState<Method>('cash');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formattedDate = date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
   const handleSubmit = async () => {
     if (!amount) return;
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    // TODO: replace with your FastAPI call
-    // await fetch(`${API_URL}/payments`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ amount: Number(amount), paidOn: date.toISOString(), method }),
-    // });
+    try {
+      setIsSubmitting(true);
+      
+      // Retrieve the stored memberId from AsyncStorage
+      const memberId = await AsyncStorage.getItem('memberId');
+      
+      if (!memberId) {
+        Alert.alert('Session Error', 'Please log in again with your access key.');
+        return;
+      }
 
-    setSubmitted(true);
-    setTimeout(() => router.back(), 900);
+      const response = await fetch(`${API_BASE_URL}/members/${memberId}/payments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: Number(amount),
+          paidOn: date.toISOString(),
+          method,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save payment to server');
+      }
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setSubmitted(true);
+      setTimeout(() => router.back(), 900);
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Could not log payment. Check your server connection.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -117,13 +146,13 @@ export default function PaymentModal() {
           })}
         </View>
 
-        <Pressable onPress={handleSubmit} disabled={!amount}>
+        <Pressable onPress={handleSubmit} disabled={!amount || isSubmitting}>
           <MotiView
             from={{ scale: 1 }}
             animate={{ scale: amount ? 1 : 0.98 }}
-            style={[styles.submitButton, !amount && styles.submitButtonDisabled]}
+            style={[styles.submitButton, (!amount || isSubmitting) && styles.submitButtonDisabled]}
           >
-            <Text style={styles.submitText}>Add to trail</Text>
+            <Text style={styles.submitText}>{isSubmitting ? 'Saving...' : 'Add to trail'}</Text>
           </MotiView>
         </Pressable>
       </MotiView>
