@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.dualitycodes.homeward"
     },
     "web": {
       "output": "static",
@@ -46,7 +47,11 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiUrl": "https://homeward-iota.vercel.app"
+      "apiUrl": "https://homeward-iota.vercel.app",
+      "router": {},
+      "eas": {
+        "projectId": "e636420a-c609-439d-bbdc-62018af46df0"
+      }
     }
   }
 }
