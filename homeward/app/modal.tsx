@@ -6,11 +6,9 @@ import { MotiView, AnimatePresence } from 'moti';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LoanTheme } from '@/constants/loan-theme';
+import { API_BASE_URL } from '@/constants/config';
 
 type Method = 'cash' | 'cheque';
-
-// Match the local IP address you used in index.tsx
-const API_BASE_URL = 'http://192.168.1.100:8000';
 
 export default function PaymentModal() {
   const router = useRouter();

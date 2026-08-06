@@ -14,8 +14,7 @@ import { useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MotiView } from "moti";
 import { LoanTheme } from "@/constants/loan-theme";
-
-const API_BASE_URL = "http://192.168.1.100:8000";
+import { API_BASE_URL } from '@/constants/config';
 
 interface PaymentItem {
   id: string;

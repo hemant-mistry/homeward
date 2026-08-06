@@ -18,7 +18,7 @@ class AccessValidationResponse(BaseModel):
 class DashboardResponse(BaseModel):
     ownedPercentage: float
     totalPaidOff: float
-    timeSavedMonths: int
+    remainingPrincipal: float
 
 # --- Payments ---
 class PaymentCreateRequest(BaseModel):

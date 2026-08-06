@@ -16,8 +16,7 @@ import { ProgressTrail } from "@/components/ui/progress-trail";
 import { StatCard } from "@/components/ui/stat-card";
 import { MilestoneBadges } from "@/components/ui/milestone-badges";
 import { LoanTheme } from "@/constants/loan-theme";
-
-const API_BASE_URL = "http://192.168.1.100:8000";
+import { API_BASE_URL } from "@/constants/config";
 
 const formatToLakhs = (amount: number) => {
   if (amount < 100000) {
@@ -38,7 +37,7 @@ export default function HomeScreen() {
   const [dashboardData, setDashboardData] = useState({
     ownedPercentage: 0,
     totalPaidOff: 0,
-    timeSavedMonths: 0,
+    remainingPrincipal: 0,
   });
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
 
@@ -195,8 +194,8 @@ export default function HomeScreen() {
             value={formatToLakhs(dashboardData.totalPaidOff)}
           />
           <StatCard
-            label="Time saved"
-            value={`${dashboardData.timeSavedMonths} months`}
+            label="Remaining"
+            value={formatToLakhs(dashboardData.remainingPrincipal)}
           />
         </View>
 
@@ -207,7 +206,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: LoanTheme.background, paddingTop:-15 },
+  container: {
+    flex: 1,
+    backgroundColor: LoanTheme.background,
+    paddingTop: -15,
+  },
   centerContent: { justifyContent: "center", alignItems: "center" },
   content: { paddingHorizontal: 16, paddingBottom: 24, gap: 16 },
   header: {
