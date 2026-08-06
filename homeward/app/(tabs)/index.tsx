@@ -28,7 +28,7 @@ export default function HomeScreen() {
       <MilestoneBadges progress={progress} />
 
       <Pressable style={styles.button}>
-        <Text style={styles.buttonText}>Log this month's payment</Text>
+        <Text style={styles.buttonText}>Log this month&apos;s payment</Text>
       </Pressable>
     </ScrollView>
   );
