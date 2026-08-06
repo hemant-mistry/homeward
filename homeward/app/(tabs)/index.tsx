@@ -1,98 +1,51 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React from 'react';
+import { ScrollView, View, Text, StyleSheet, Pressable } from 'react-native';
+import { ProgressTrail } from '@/components/ui/progress-trail';
+import { StatCard } from '@/components/ui/stat-card';
+import { MilestoneBadges } from '@/components/ui/milestone-badges';
+import { LoanTheme } from '@/constants/loan-theme';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  // TODO: replace with data from your FastAPI backend
+  const progress = 62;
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.greeting}>Good Day!</Text>
+          <Text style={styles.title}>The Mistry Home</Text>
+        </View>
+      </View>
+
+      <ProgressTrail progress={progress} amountLeftLabel={`${100 - progress}% left to reach home`} />
+
+      <View style={styles.statsRow}>
+        <StatCard label="Paid off" value="₹31.2L" />
+        <StatCard label="Time saved" value="7 months" />
+      </View>
+
+      <MilestoneBadges progress={progress} />
+
+      <Pressable style={styles.button}>
+        <Text style={styles.buttonText}>Log this month's payment</Text>
+      </Pressable>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: { flex: 1, backgroundColor: LoanTheme.background },
+  content: { padding: 16, gap: 16 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  greeting: { fontSize: 13, color: LoanTheme.textSecondary },
+  title: { fontSize: 20, fontWeight: '600', color: LoanTheme.textPrimary, marginTop: 2 },
+  statsRow: { flexDirection: 'row', gap: 12 },
+  button: {
+    backgroundColor: LoanTheme.primary,
+    borderRadius: 14,
+    paddingVertical: 14,
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  buttonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '600' },
 });

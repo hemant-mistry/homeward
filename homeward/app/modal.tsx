@@ -1,29 +1,169 @@
-import { Link } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { MotiView, AnimatePresence } from 'moti';
+import * as Haptics from 'expo-haptics';
+import { LoanTheme } from '@/constants/loan-theme';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+type Method = 'cash' | 'cheque';
 
-export default function ModalScreen() {
+export default function PaymentModal() {
+  const router = useRouter();
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+  const [method, setMethod] = useState<Method>('cash');
+  const [submitted, setSubmitted] = useState(false);
+
+  const formattedDate = date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  const handleSubmit = async () => {
+    if (!amount) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    // TODO: replace with your FastAPI call
+    // await fetch(`${API_URL}/payments`, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ amount: Number(amount), paidOn: date.toISOString(), method }),
+    // });
+
+    setSubmitted(true);
+    setTimeout(() => router.back(), 900);
+  };
+
+  if (submitted) {
+    return (
+      <View style={styles.successContainer}>
+        <MotiView
+          from={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', damping: 9 }}
+          style={styles.successCircle}
+        >
+          <Text style={styles.successCheck}>✓</Text>
+        </MotiView>
+        <Text style={styles.successText}>Payment logged</Text>
+      </View>
+    );
+  }
+
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">This is a modal</ThemedText>
-      <Link href="/" dismissTo style={styles.link}>
-        <ThemedText type="link">Go to home screen</ThemedText>
-      </Link>
-    </ThemedView>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <MotiView
+        from={{ opacity: 0, translateY: 16 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 400 }}
+        style={styles.content}
+      >
+        <Text style={styles.title}>Log a payment</Text>
+        <Text style={styles.subtitle}>Every bit adds to the trail home</Text>
+
+        <Text style={styles.label}>Amount paid</Text>
+        <View style={styles.amountRow}>
+          <Text style={styles.rupee}>₹</Text>
+          <TextInput
+            value={amount}
+            onChangeText={setAmount}
+            placeholder="0"
+            placeholderTextColor={LoanTheme.textMuted}
+            keyboardType="numeric"
+            style={styles.amountInput}
+          />
+        </View>
+
+        <Text style={styles.label}>Date paid</Text>
+        <Pressable style={styles.dateButton} onPress={() => setShowPicker(true)}>
+          <Text style={styles.dateButtonText}>{formattedDate}</Text>
+        </Pressable>
+        {showPicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'inline' : 'default'}
+            maximumDate={new Date()}
+            onChange={(_, selected) => {
+              setShowPicker(Platform.OS === 'ios');
+              if (selected) setDate(selected);
+            }}
+          />
+        )}
+
+        <Text style={styles.label}>Paid via</Text>
+        <View style={styles.methodRow}>
+          {(['cash', 'cheque'] as Method[]).map((m) => {
+            const active = method === m;
+            return (
+              <Pressable key={m} onPress={() => setMethod(m)} style={styles.methodButtonWrapper}>
+                <AnimatePresence>
+                  <MotiView
+                    animate={{
+                      backgroundColor: active ? LoanTheme.primary : LoanTheme.surfaceMuted,
+                    }}
+                    transition={{ type: 'timing', duration: 200 }}
+                    style={styles.methodButton}
+                  >
+                    <Text style={[styles.methodText, active && styles.methodTextActive]}>
+                      {m === 'cash' ? 'Cash' : 'Cheque'}
+                    </Text>
+                  </MotiView>
+                </AnimatePresence>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Pressable onPress={handleSubmit} disabled={!amount}>
+          <MotiView
+            from={{ scale: 1 }}
+            animate={{ scale: amount ? 1 : 0.98 }}
+            style={[styles.submitButton, !amount && styles.submitButtonDisabled]}
+          >
+            <Text style={styles.submitText}>Add to trail</Text>
+          </MotiView>
+        </Pressable>
+      </MotiView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+  container: { flex: 1, backgroundColor: LoanTheme.background },
+  content: { padding: 20, gap: 6 },
+  title: { fontSize: 22, fontWeight: '600', color: LoanTheme.textPrimary, marginTop: 12 },
+  subtitle: { fontSize: 13, color: LoanTheme.textSecondary, marginBottom: 16 },
+  label: { fontSize: 13, color: LoanTheme.textSecondary, marginTop: 14, marginBottom: 6 },
+  amountRow: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: LoanTheme.surface,
+    borderRadius: 14, borderWidth: 1, borderColor: LoanTheme.border, paddingHorizontal: 14,
   },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
+  rupee: { fontSize: 20, color: LoanTheme.textSecondary, marginRight: 6 },
+  amountInput: { flex: 1, fontSize: 22, paddingVertical: 12, color: LoanTheme.textPrimary },
+  dateButton: {
+    backgroundColor: LoanTheme.surface, borderRadius: 14, borderWidth: 1,
+    borderColor: LoanTheme.border, paddingVertical: 14, paddingHorizontal: 14,
   },
+  dateButtonText: { fontSize: 15, color: LoanTheme.textPrimary },
+  methodRow: { flexDirection: 'row', gap: 10 },
+  methodButtonWrapper: { flex: 1 },
+  methodButton: { borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+  methodText: { fontSize: 14, fontWeight: '500', color: LoanTheme.textSecondary },
+  methodTextActive: { color: '#FFFFFF' },
+  submitButton: {
+    marginTop: 28, backgroundColor: LoanTheme.primary, borderRadius: 14,
+    paddingVertical: 15, alignItems: 'center',
+  },
+  submitButtonDisabled: { opacity: 0.5 },
+  submitText: { color: '#FFFFFF', fontSize: 15, fontWeight: '600' },
+  successContainer: { flex: 1, backgroundColor: LoanTheme.background, alignItems: 'center', justifyContent: 'center', gap: 16 },
+  successCircle: {
+    width: 84, height: 84, borderRadius: 42, backgroundColor: LoanTheme.primary,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  successCheck: { color: '#FFFFFF', fontSize: 36, fontWeight: '600' },
+  successText: { fontSize: 16, color: LoanTheme.textPrimary, fontWeight: '500' },
 });
