@@ -24,7 +24,8 @@ class DashboardResponse(BaseModel):
 class PaymentCreateRequest(BaseModel):
     amount: float = Field(..., gt=0, description="Contribution amount must be greater than zero")
     paidOn: Optional[str] = None  # Accepts the ISO date string from the modal
-    method: Optional[str] = "cash"
+    payment_method: str = "cash"
+    notes: str | None = None
 
 class PaymentResponse(BaseModel):
     id: str
@@ -34,6 +35,8 @@ class PaymentResponse(BaseModel):
     amount: float
     timestamp: datetime
     isMilestone: bool = Field(default=False, validation_alias="is_milestone")
+    payment_method: str 
+    notes: str | None = None
 
 # --- Milestones ---
 class MilestoneResponse(BaseModel):

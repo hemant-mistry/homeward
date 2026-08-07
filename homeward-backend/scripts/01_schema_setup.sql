@@ -22,8 +22,10 @@ CREATE TABLE payments (
     member_id TEXT REFERENCES members(id) ON DELETE CASCADE,
     member_name TEXT NOT NULL, -- Stored directly here to optimize API read speeds
     amount NUMERIC NOT NULL CHECK (amount > 0),
+    payment_method TEXT NOT NULL DEFAULT 'cash', -- NEW: cash or cheque
+    notes TEXT, -- NEW: Optional short text
     is_milestone BOOLEAN DEFAULT FALSE,
-    timestamp TIMESTAMPTZ DEFAULT now()
+    timestamp TIMESTAMPTZ DEFAULT now() -- Consider renaming to 'paid_on' later if it matches your API payload!
 );
 
 -- 4. Create Milestones Table (The gamified progress)

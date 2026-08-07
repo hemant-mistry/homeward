@@ -5,7 +5,6 @@ import uuid
 
 class PaymentRepository:
     def create_payment(self, member_id: str, payload: PaymentCreateRequest, member_name: str) -> dict:
-        # Use the date picked by the user, or default to current UTC time
         timestamp_val = payload.paidOn if payload.paidOn else datetime.utcnow().isoformat()
         
         data = {
@@ -14,7 +13,9 @@ class PaymentRepository:
             "member_name": member_name,
             "amount": payload.amount,
             "timestamp": timestamp_val,
-            "is_milestone": False
+            "is_milestone": False,
+            "payment_method": payload.payment_method, 
+            "notes": payload.notes                    
         }
         
         response = supabase.table("payments").insert(data).execute()
@@ -29,7 +30,6 @@ class PaymentRepository:
             .execute()
             
         return response.data
-
 
     def get_payments_by_household(self, household_id: str, limit: int = 20) -> list:
         # Find all members in this household first

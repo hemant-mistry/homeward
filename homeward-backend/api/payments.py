@@ -16,7 +16,7 @@ async def get_payments(
     service: PaymentService = Depends(get_payment_service)
 ):
     try:
-        return service.fetch_member_payments(memberId, limit)
+        return service.fetch_payment_history(memberId, limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

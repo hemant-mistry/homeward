@@ -23,6 +23,8 @@ interface PaymentItem {
   amount: number;
   timestamp: string;
   isMilestone: boolean;
+  payment_method?: string; // Added to capture cash/cheque
+  notes?: string | null;   // Added to capture optional notes
 }
 
 const formatDate = (isoString: string) => {
@@ -36,6 +38,12 @@ const formatDate = (isoString: string) => {
   } catch {
     return isoString;
   }
+};
+
+// Helper to capitalize payment method nicely (e.g., 'cash' -> 'Cash')
+const formatMethod = (method?: string) => {
+  if (!method) return 'Cash';
+  return method.charAt(0).toUpperCase() + method.slice(1);
 };
 
 // Check if payment was created within the last 24 hours
@@ -154,13 +162,20 @@ export default function HistoryScreen() {
                     {item.memberName ? item.memberName[0] : "U"}
                   </Text>
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.rowTitle}>
                     {item.memberName} paid ₹{item.amount.toLocaleString("en-IN")}
                   </Text>
                   <Text style={styles.rowSubtitle}>
-                    {formatDate(item.timestamp)} · Cash
+                    {formatDate(item.timestamp)} · {formatMethod(item.payment_method)}
                   </Text>
+                  
+                  {/* Render notes if they exist */}
+                  {item.notes ? (
+                    <Text style={styles.rowNotes} numberOfLines={2}>
+                      "{item.notes}"
+                    </Text>
+                  ) : null}
                 </View>
 
                 {showDelete && (
@@ -181,14 +196,8 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: LoanTheme.background, paddingHorizontal: 16, paddingTop: -10 },
+  container: { flex: 1, backgroundColor: LoanTheme.background, paddingHorizontal: 16, paddingTop: 10 },
   centerContent: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: LoanTheme.textPrimary,
-    marginBottom: 12,
-  },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -207,7 +216,13 @@ const styles = StyleSheet.create({
   },
   avatarText: { color: LoanTheme.accent, fontWeight: "600" },
   rowTitle: { fontSize: 14, fontWeight: "500", color: LoanTheme.textPrimary },
-  rowSubtitle: { fontSize: 12, color: LoanTheme.textSecondary, marginTop: 2 },
+  rowSubtitle: { fontSize: 12, color: LoanTheme.textSecondary },
+  rowNotes: { 
+    fontSize: 12, 
+    color: LoanTheme.textSecondary, 
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
   emptyText: { color: LoanTheme.textSecondary, fontSize: 15 },
   deleteButton: {
     width: 28,
